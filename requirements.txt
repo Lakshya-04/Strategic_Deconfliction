@@ -1,0 +1,9 @@
+# For numerical operations and vector math
+numpy
+
+# For 3D plotting and animation
+matplotlib
+
+# For interactive 4D visualization (Extra Credit)
+plotly
+pandas
