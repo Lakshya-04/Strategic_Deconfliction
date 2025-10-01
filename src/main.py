@@ -139,7 +139,7 @@ def main():
         Trajectory(
             drone_id="drone_D_multi_conflict",
             waypoints=[
-                Waypoint(position=np.array([25, 10, 10]), timestamp=0), # Conflicts with A and B
+                Waypoint(position=np.array([0, 10, 10]), timestamp=0), # Conflicts with A and B
                 Waypoint(position=np.array([25, 10, 10]), timestamp=10) # Stationary
             ]
         )
