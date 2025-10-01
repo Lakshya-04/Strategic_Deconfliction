@@ -95,10 +95,11 @@ def min_distance_between_segments(p1: np.ndarray, q1: np.ndarray, p2: np.ndarray
 
 class MissionApprovalResult:
     """Result of a mission approval request"""
-    def __init__(self, drone_id: str, approved: bool, conflicts: List[Conflict]):
+    def __init__(self, drone_id: str, approved: bool, conflicts: List[Conflict], spawn_conflict: bool = False):
         self.drone_id = drone_id
         self.approved = approved
         self.conflicts = conflicts
+        self.spawn_conflict = spawn_conflict  # NEW: Flag for spawn conflicts
         self.conflicting_drones = list(set([
             other_drone for conflict in conflicts 
             for other_drone in conflict.conflicting_drone_ids 
@@ -123,16 +124,25 @@ class DeconflictionServer:
     def submit_mission_for_approval(self, trajectory: Trajectory, safety_buffer: float) -> MissionApprovalResult:
         """
         Submit a mission for sequential approval against all previously approved trajectories.
+        Enhanced with spawn conflict detection.
         Returns MissionApprovalResult with approval status and any conflicts found.
         """
         conflicts = []
+        spawn_conflict = False
 
-        # Check against all previously approved trajectories
-        for approved_traj in self.approved_trajectories.values():
-            trajectory_conflicts = self._check_trajectory_conflicts(
-                trajectory, approved_traj, safety_buffer
-            )
-            conflicts.extend(trajectory_conflicts)
+        # FIRST: Check spawn position conflicts
+        spawn_conflicts = self._check_spawn_conflicts(trajectory, safety_buffer)
+        if spawn_conflicts:
+            conflicts.extend(spawn_conflicts)
+            spawn_conflict = True
+
+        # SECOND: Check trajectory path conflicts (only if no spawn conflicts)
+        if not spawn_conflict:
+            for approved_traj in self.approved_trajectories.values():
+                trajectory_conflicts = self._check_trajectory_conflicts(
+                    trajectory, approved_traj, safety_buffer
+                )
+                conflicts.extend(trajectory_conflicts)
 
         # Determine approval status
         approved = len(conflicts) == 0
@@ -144,14 +154,42 @@ class DeconflictionServer:
             self.rejected_trajectories[trajectory.drone_id] = trajectory
 
         # Create and store result
-        result = MissionApprovalResult(trajectory.drone_id, approved, conflicts)
+        result = MissionApprovalResult(trajectory.drone_id, approved, conflicts, spawn_conflict)
         self.approval_history.append(result)
 
         return result
 
+    def _check_spawn_conflicts(self, new_trajectory: Trajectory, safety_buffer: float) -> List[Conflict]:
+        """
+        Check if the new trajectory's spawn position conflicts with any approved trajectories.
+        Returns list of spawn conflicts.
+        """
+        spawn_conflicts = []
+        new_spawn_pos = new_trajectory.waypoints[0].position
+        new_spawn_time = new_trajectory.waypoints[0].timestamp
+
+        for approved_traj in self.approved_trajectories.values():
+            # Check spawn position against approved drone's position at new drone's spawn time
+            approved_pos_at_spawn_time = approved_traj.get_state_at_time(new_spawn_time)
+
+            if approved_pos_at_spawn_time is not None:
+                spawn_distance = np.linalg.norm(new_spawn_pos - approved_pos_at_spawn_time)
+
+                if spawn_distance < safety_buffer:
+                    # Create spawn conflict
+                    conflict = Conflict(
+                        time_of_conflict=new_spawn_time,  # Conflict at spawn time, not midpoint
+                        location_of_conflict=new_spawn_pos,  # Conflict at new drone's spawn location
+                        conflicting_drone_ids=(new_trajectory.drone_id, approved_traj.drone_id),
+                        minimum_separation=spawn_distance
+                    )
+                    spawn_conflicts.append(conflict)
+
+        return spawn_conflicts
+
     def _check_trajectory_conflicts(self, traj1: Trajectory, traj2: Trajectory, safety_buffer: float) -> List[Conflict]:
         """
-        Check for conflicts between two trajectories.
+        Check for conflicts between two trajectories along their paths.
         Returns list of Conflict objects found.
         """
         conflicts = []
@@ -212,18 +250,24 @@ class DeconflictionServer:
             all_conflicts.extend(result.conflicts)
         return all_conflicts
 
+    def get_rejected_drone_ids(self) -> List[str]:
+        """Get list of rejected drone IDs for visualization"""
+        return list(self.rejected_trajectories.keys())
+
     def get_approval_summary(self) -> Dict:
         """Get summary of all approval attempts"""
+        spawn_conflicts = sum(1 for result in self.approval_history if result.spawn_conflict)
         return {
             'total_submitted': len(self.approval_history),
             'approved': len(self.approved_trajectories),
             'rejected': len(self.rejected_trajectories),
-            'total_conflicts': sum(len(result.conflicts) for result in self.approval_history)
+            'total_conflicts': sum(len(result.conflicts) for result in self.approval_history),
+            'spawn_conflicts': spawn_conflicts
         }
 
-    # Legacy method for backward compatibility
+    # Legacy methods for backward compatibility
     def add_simulated_trajectory(self, trajectory: Trajectory):
-        """Legacy method - adds trajectory directly to approved list (for backward compatibility)"""
+        """Legacy method - adds trajectory directly to approved list"""
         self.approved_trajectories[trajectory.drone_id] = trajectory
 
     def validate_mission(self, primary_trajectory: Trajectory, safety_buffer: float) -> List[Conflict]:
