@@ -9,6 +9,7 @@ from .data_structures import (
 )
 from .deconfliction_service import UAVDeconflictionService
 from .visualization import create_trajectory_visualization
+from .trajectory_animated import create_trajectory_animation
 
 def create_test_scenarios() -> List[dict]:
     """
@@ -196,7 +197,7 @@ def create_test_scenarios() -> List[dict]:
     
     return scenarios
 
-def run_validation_scenario(scenario: dict, visualize: bool = False) -> DeconflictionResult:
+def run_validation_scenario(scenario: dict, visualize: bool = False, animate: bool = False) -> DeconflictionResult:
     """
     /// @brief Execute a single validation scenario and report results
     /// 
@@ -285,6 +286,27 @@ def run_validation_scenario(scenario: dict, visualize: bool = False) -> Deconfli
             scenario_name=scenario['name']
         )
         print(f"   Visualization saved: {filename}")
+
+    # Generate animated visualization if requested
+    if animate:
+        print(f"\\n🎬 Generating animated trajectory visualization...")
+        try:
+            animation_filename = create_trajectory_animation(
+                trajectories=all_trajectories,
+                conflicts=result.conflicts,
+                scenario_name=scenario['name'],
+                primary_drone_id=primary.trajectory.drone_id,
+                save_video=True,
+                show_interactive=False,  # Don't show interactive during batch processing
+                fps=15
+            )
+            if animation_filename:
+                print(f"   ✅ Animation video saved: {animation_filename}")
+            else:
+                print(f"   ⚠️ Animation generation skipped (no trajectories)")
+        except Exception as e:
+            print(f"   ❌ Animation generation failed: {e}")
+            print(f"      Make sure matplotlib and ffmpeg are properly installed")
     
     return result
 
@@ -304,18 +326,29 @@ def main():
     print("  • Temporal overlap analysis and mission window validation")
     print("  • Comprehensive conflict reporting and explanations")
     print("  • Interactive 4D visualization capabilities")
+    print("  • Real-time animated trajectory playback with MP4 export")
     
+    # Configuration options
+    ENABLE_STATIC_VISUALIZATION = True
+    ENABLE_ANIMATION = True
+
     # Load test scenarios
     scenarios = create_test_scenarios()
     results = []
     
     # Execute all scenarios
-    for scenario in scenarios:
-        result = run_validation_scenario(scenario, visualize=True)
+    for i, scenario in enumerate(scenarios, 1):
+        print(f"\\n🔄 Processing scenario {i}/{len(scenarios)}...")
+        
+        result = run_validation_scenario(
+            scenario, 
+            visualize=ENABLE_STATIC_VISUALIZATION, 
+            animate=ENABLE_ANIMATION
+        )
         results.append(result)
         
-        # Brief pause between scenarios for readability
-        time.sleep(0.5)
+        # Brief pause between scenarios for readability and processing
+        time.sleep(1.0)
     
     # Generate summary statistics
     print(f"\n{'='*80}")
@@ -343,7 +376,22 @@ def main():
         print(f"  Spatial Conflicts: {spatial_conflicts} ({(spatial_conflicts/total_conflicts)*100:.1f}%)")
         print(f"  Temporal Conflicts: {temporal_conflicts} ({(temporal_conflicts/total_conflicts)*100:.1f}%)")
     
-    print(f"\n✅ Validation complete - System ready for production deployment")
+    # Visualization summary
+    if ENABLE_STATIC_VISUALIZATION or ENABLE_ANIMATION:
+        print(f"\\n🎨 Generated Visualizations:")
+        if ENABLE_STATIC_VISUALIZATION:
+            print(f"  📊 Static HTML files: {total_scenarios} interactive 3D plots")
+        if ENABLE_ANIMATION:
+            print(f"  🎬 Animation MP4 files: {total_scenarios} trajectory videos")
+            print(f"     • Frame rate: 15 FPS")
+            print(f"     • Features: Real-time movement, conflict highlighting, safety buffers")
+    
+    print(f"\\n✅ Validation complete - System ready for production deployment")
+    print(f"\\n📁 Output Files Generated:")
+    if ENABLE_STATIC_VISUALIZATION:
+        print(f"   • *_visualization.html - Interactive 3D trajectory plots")
+    if ENABLE_ANIMATION:
+        print(f"   • *_animation.mp4 - Animated trajectory videos")
 
 if __name__ == "__main__":
     main()

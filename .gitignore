@@ -3,3 +3,5 @@ sl.py
 .vscode/
 __pycache__/
 *.pyc
+venv/
+strategic_deconfliction.egg-info/
