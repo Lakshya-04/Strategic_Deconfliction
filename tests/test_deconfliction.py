@@ -92,9 +92,9 @@ class TestDataStructures:
         assert np.array_equal(pos, np.array([0, 0, 0]))
     
     def test_empty_trajectory(self):
-        """Test trajectory with no waypoints"""
-        empty_traj = Trajectory(drone_id="EMPTY", waypoints=[])
-        assert empty_traj.get_state_at_time(5.0) is None
+        """Test that creating a trajectory with no waypoints raises a ValueError."""
+        with pytest.raises(ValueError, match="waypoints list must contain at least one waypoint"):
+            Trajectory(drone_id="EMPTY", waypoints=[])
     
     def test_primary_mission_time_window(self):
         """Test primary mission time window validation"""
@@ -385,17 +385,12 @@ class TestErrorHandling:
         service = UAVDeconflictionService()
         
         # Test with None trajectory
-        with pytest.raises(AttributeError):
-            invalid_mission = PrimaryMission(None, 0, 100)
-            service.validate_primary_mission(invalid_mission)
+        with pytest.raises(TypeError):
+            PrimaryMission(None, 0, 100)
+        with pytest.raises(ValueError): 
+            empty_traj = Trajectory("EMPTY", [])
+            PrimaryMission(empty_traj, 0, 100)
         
-        # Test with empty waypoints
-        empty_traj = Trajectory("EMPTY", [])
-        empty_mission = PrimaryMission(empty_traj, 0, 100)
-        
-        # Should handle gracefully without crashing
-        result = service.validate_primary_mission(empty_mission)
-        assert not result.is_approved()  # Should reject empty trajectories
     
     def test_invalid_safety_buffer(self):
         """Test handling of invalid safety buffer values"""

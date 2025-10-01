@@ -26,7 +26,7 @@ def _point_segment_distance(point: np.ndarray, seg_p1: np.ndarray, seg_p2: np.nd
     # Handle degenerate case: zero-length segment (seg_p1 == seg_p2)
     line_len_sq = np.dot(line_vec, line_vec)
     if line_len_sq == 0.0:
-        return np.linalg.norm(point_vec)
+        return float(np.linalg.norm(point_vec))
     
     # Find projection parameter t: closest point = seg_p1 + t * line_vec
     t = np.dot(point_vec, line_vec) / line_len_sq
@@ -34,7 +34,7 @@ def _point_segment_distance(point: np.ndarray, seg_p1: np.ndarray, seg_p2: np.nd
     
     # Calculate closest point on segment and return distance
     closest_point_on_segment = seg_p1 + t * line_vec
-    return np.linalg.norm(point - closest_point_on_segment)
+    return float(np.linalg.norm(point - closest_point_on_segment))
 
 def min_distance_between_segments(p1: np.ndarray, q1: np.ndarray, p2: np.ndarray, q2: np.ndarray) -> float:
     """
@@ -59,7 +59,7 @@ def min_distance_between_segments(p1: np.ndarray, q1: np.ndarray, p2: np.ndarray
     
     # Handle degenerate cases where one or both segments are points
     if a < 1e-7 and c < 1e-7:  # Both segments are points
-        return np.linalg.norm(w)
+        return float(np.linalg.norm(w))
     if a < 1e-7:  # Segment 1 is a point
         return _point_segment_distance(p1, p2, q2)
     if c < 1e-7:  # Segment 2 is a point
@@ -122,7 +122,7 @@ def min_distance_between_segments(p1: np.ndarray, q1: np.ndarray, p2: np.ndarray
     
     # Vector between closest points on the two segments
     dP = w + (sc * u) - (tc * v)
-    return np.linalg.norm(dP)
+    return float(np.linalg.norm(dP))
 
 class UAVDeconflictionService:
     """

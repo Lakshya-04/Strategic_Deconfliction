@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from typing import List, Optional
 from .data_structures import Trajectory, Conflict
+from typing import Union, List, Any
 
 def create_trajectory_visualization(trajectories: List[Trajectory], 
                                   conflicts: List[Conflict], 
@@ -66,6 +67,7 @@ def create_trajectory_visualization(trajectories: List[Trajectory],
             continue
             
         traj_df = pd.DataFrame(traj_data)
+        colorscale: Union[str, List[List[Any]]]
         
         # Configure colors and styling based on drone type
         if is_primary:
