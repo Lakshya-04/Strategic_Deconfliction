@@ -1,7 +1,6 @@
-# Updated GitHub Actions Workflow
 name: UAV Deconfliction System - Comprehensive Test Suite
 
-on: 
+on:
   push:
     branches: [ main, develop ]
   pull_request:
@@ -13,60 +12,76 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
-    
+
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-        
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3-dev
-        
-    - name: Install Python dependencies
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install all dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-cov pytest-xdist pytest-timeout numpy pandas plotly scipy matplotlib
-        pip install -e .  # Install package in development mode
-        
+        pip install -e '.[dev]'
+
     - name: Lint with flake8
       run: |
-        pip install flake8
         flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-        
+
     - name: Type checking with mypy
       run: |
-        pip install mypy types-setuptools
         mypy src/ --ignore-missing-imports --no-strict-optional
-        
+
     - name: Run comprehensive test suite
       env:
         PYTHONPATH: ${{ github.workspace }}
       run: |
         pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing --maxfail=5 --timeout=30
-        
+
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       with:
-        file: ./coverage.xml
+        files: ./coverage.xml # Corrected key from 'file' to 'files'
         flags: unittests
         name: codecov-umbrella
-        
+
     - name: Performance benchmarks
       run: |
         python tests/benchmark_performance.py
-        
     - name: Integration tests with visualization
       run: |
         python -m src.main  # Ensure main scenarios run successfully
 
   security:
+    # This job now has the required setup steps
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Run security checks
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install project with corrected dependencies
+      # THIS IS THE CRITICAL STEP THAT WAS MISSING
+      # It upgrades pip and installs the secure setuptools from your pyproject.toml
+      run: |
+        python -m pip install --upgrade pip
+        pip install .
+
+    - name: Run security audit
       uses: pypa/gh-action-pip-audit@v1.0.8
