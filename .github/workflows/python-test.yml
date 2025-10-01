@@ -18,5 +18,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest numpy pandas plotly  # Add any other dependencies needed
     - name: Run tests
+      env:
+        PYTHONPATH: ${{ github.workspace }}
       run: |
         pytest tests/test_deconfliction.py --maxfail=1 --disable-warnings -q
