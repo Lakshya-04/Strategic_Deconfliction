@@ -48,8 +48,8 @@ def main():
         Trajectory(
             drone_id="sim_drone_1_colliding",
             waypoints=[
-                Waypoint(position=np.array([50, 0, 10]), timestamp=0),
-                Waypoint(position=np.array([50, 0, 10]), timestamp=10)
+                Waypoint(position=np.array([50, -25, 10]), timestamp=0),
+                Waypoint(position=np.array([50, 25, 10]), timestamp=10)
             ]
         ),
         Trajectory(
@@ -67,7 +67,7 @@ def main():
     primary_mission_safe = Trajectory(
         drone_id="primary_drone",
         waypoints=[
-            Waypoint(position=np.array([0, 0, 10]), timestamp=0),
+            Waypoint(position=np.array([0, 20, 10]), timestamp=0),
             Waypoint(position=np.array([100, 0, 10]), timestamp=10)
         ]
     )
@@ -76,7 +76,7 @@ def main():
         Trajectory(
             drone_id="sim_drone_2_safe",
             waypoints=[
-                Waypoint(position=np.array([0, 20, 10]), timestamp=0),
+                Waypoint(position=np.array([0, 0, 10]), timestamp=0),
                 Waypoint(position=np.array([100, 20, 10]), timestamp=10)
             ]
         ),

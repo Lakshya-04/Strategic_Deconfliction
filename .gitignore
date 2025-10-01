@@ -1,2 +1,5 @@
 sl.py
 *.html
+.vscode/
+__pycache__/
+*.pyc
