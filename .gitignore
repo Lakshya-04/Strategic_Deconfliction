@@ -1,5 +1,6 @@
-sl.py
 *.html
 .vscode/
 __pycache__/
 *.pyc
+venv/
+*.mp4

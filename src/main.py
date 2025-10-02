@@ -118,8 +118,8 @@ def main():
         Trajectory(
             drone_id="drone_3_parallel",
             waypoints=[
-                Waypoint(position=np.array([0, 50, 10]), timestamp=0),
-                Waypoint(position=np.array([100, 50, 10]), timestamp=10)
+                Waypoint(position=np.array([0, 50, 10]), timestamp=10),
+                Waypoint(position=np.array([100, 50, 10]), timestamp=20)
             ]
         )
     ]
@@ -134,21 +134,21 @@ def main():
             drone_id="drone_A_first",
             waypoints=[
                 Waypoint(position=np.array([0, 0, 10]), timestamp=0),
-                Waypoint(position=np.array([50, 0, 10]), timestamp=5)
+                Waypoint(position=np.array([50, 0, 10]), timestamp=10)
             ]
         ),
         Trajectory(
             drone_id="drone_B_spawn_conflict",
             waypoints=[
                 Waypoint(position=np.array([15, 15, 10]), timestamp=0),   # Only 5m from drone_A spawn - SPAWN CONFLICT
-                Waypoint(position=np.array([45, 10, 10]), timestamp=5)
+                Waypoint(position=np.array([45, 10, 10]), timestamp=10)
             ]
         ),
         Trajectory(
             drone_id="drone_C_safe_spawn",
             waypoints=[
-                Waypoint(position=np.array([0, 20, 10]), timestamp=0),  # 20m separation - SAFE
-                Waypoint(position=np.array([50, 20, 10]), timestamp=5)
+                Waypoint(position=np.array([0, 20, 10]), timestamp=10),
+                Waypoint(position=np.array([50, 20, 10]), timestamp=15)
             ]
         ),
         Trajectory(
