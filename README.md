@@ -33,6 +33,29 @@ A comprehensive system for validating UAV missions in shared airspace by detecti
 - Conflict markers in interactive plots
 - Exportable HTML visualizations and detailed reports
 
+### Demo Video  
+Corrected Video Link for submission. Sincere, Apologies, the Submitted Video had unforseen rendering issues.
+[![Watch the Demo](https://img.youtube.com/vi/jETbcOUeERw/maxresdefault.jpg)](https://youtu.be/jETbcOUeERw)
+
+## Visualization
+
+### Main Scenarios
+
+| Scenario | Preview | Link |
+| :-- | :-- | :-- |
+| Spatial Conflict – Crossing Trajectories | ![](4D_Plots/Main/Images/spatial_conflict___crossing_trajectories_visualization.png) | [View Interactive HTML](4D_Plots/Main/spatial_conflict___crossing_trajectories_visualization.html) |
+| Mission Time-Window Violation | ![](4D_Plots/Main/Images/mission_time_window_violation_visualization.png) | [View Interactive HTML](4D_Plots/Main/mission_time_window_violation_visualization.html) |
+| Conflict-Free Parallel Operations | ![](4D_Plots/Main/Images/conflict_free_parallel_operations_visualization.png) | [View Interactive HTML](4D_Plots/Main/conflict_free_parallel_operations_visualization.html) |
+| Complex Multi-Drone Airspace Animation | ![](4D_Plots/Main/Images/complex_multi_drone_airspace_visualization.png) | [View Interactive HTML](4D_Plots/Main/complex_multi_drone_airspace_visualization.html) |
+
+### Real-Life Scenarios
+Implementation of a real-life scenario, where requests would be sent to the service, one after the other. Showing how the implementation would look in deployment. Kindly look at the real_life_scenario fork to view the implementation
+
+| Scenario | Preview | Link |
+| :-- | :-- | :-- |
+| Guaranteed Collision | ![](4D_Plots/Real_Life_Scenario/Images/spawn_and_path_conflicts_4d_plot.png) | [View Interactive Plot](4D_Plots/Real_Life_Scenario/spawn_and_path_conflicts_4d_plot.html) |
+| Near Miss | ![](4D_Plots/Real_Life_Scenario/Images/sequential_collisions_4d_plot.png) | [View Interactive Plot](4D_Plots/Real_Life_Scenario/sequential_collisions_4d_plot.html) |
+
 
 ## Installation
 
@@ -119,7 +142,6 @@ print(f"Status: {result.status}")
 print(f"Conflicts: {len(result.conflicts)}")
 print(f"Time: {result.processing_time_ms:.2f} ms")
 ```
-
 
 ## Architecture
 
