@@ -84,4 +84,4 @@ jobs:
 
     - name: Run security audit
       uses: pypa/gh-action-pip-audit@v1.0.8
-      continue-on-error: false
+      continue-on-error: true

@@ -46,13 +46,13 @@ source venv/bin/activate
 2. Install the package (reads dependencies from `pyproject.toml`)
 
 ```bash
-pip install .
+pip3 install .
 ```
 
 3. Verify installation by running the demo script:
 
 ```bash
-python main.py
+python3 -m src.main
 ```
 
 
@@ -145,17 +145,6 @@ Creates interactive, animated 4D trajectory plots.
 Generates static plots, conflict markers, and summary dashboards.
 - **main.py**
 Provides demonstration scenarios, scenario loader, and `run_validation_scenario()` with optional visualization.
-
-
-## Testing
-
-- Run the built-in test scenarios:
-
-```bash
-python main.py --run-tests
-```
-
-- Extend scenarios in `main.py` or add new ones in `trajectory_animated.py`.
 
 ## License
 
